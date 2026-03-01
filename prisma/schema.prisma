@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Pipeline {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String   @default("")
+  schedule    String   @default("") // cron expression or empty for manual
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  steps Step[]
+  runs  Run[]
+
+  @@index([slug])
+}
+
+model Step {
+  id         String @id @default(cuid())
+  pipelineId String
+  name       String
+  type       String @default("extract") // extract, transform, load, filter, map, aggregate
+  config     String @default("{}") // JSON config for the step
+  order      Int    @default(0)
+
+  pipeline   Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+
+  @@index([pipelineId])
+  @@index([order])
+}
+
+model Run {
+  id         String   @id @default(cuid())
+  pipelineId String
+  status     String   @default("pending") // pending, running, success, failed, cancelled
+  startedAt  DateTime @default(now())
+  finishedAt DateTime?
+  duration   Int?     // milliseconds
+  rowsIn     Int      @default(0)
+  rowsOut    Int      @default(0)
+  error      String   @default("")
+
+  pipeline   Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  logs       Log[]
+
+  @@index([pipelineId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  runId     String
+  level     String   @default("info") // debug, info, warn, error
+  message   String
+  meta      String   @default("") // JSON metadata
+  createdAt DateTime @default(now())
+
+  run       Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@index([level])
+}
