@@ -20,6 +20,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec prisma generate
       - run: pnpm type-check
+      - name: Test
+        run: pnpm test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+          NODE_ENV: test
       - run: pnpm build
         env:
           DATABASE_URL: file:./dev.db
