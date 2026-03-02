@@ -4,6 +4,7 @@ import { prisma } from './db';
 import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'crypto';
 import { StepType } from './step-types';
+import { logger } from './logger';
 
 // ──────────────────────────────────────────────
 // Pipelines
@@ -27,7 +28,7 @@ export async function createPipeline(data: { name: string; description?: string 
     revalidatePath('/');
     return pipeline;
   } catch (err) {
-    console.error('[createPipeline]', err);
+    logger.error('Failed in createPipeline', { error: err instanceof Error ? err.message : 'Unknown error' });
     throw new Error(err instanceof Error ? err.message : 'Operation failed');
   }
 }
@@ -42,7 +43,7 @@ export async function updatePipeline(
     revalidatePath(`/pipelines/${pipeline.slug}`);
     return pipeline;
   } catch (err) {
-    console.error('[updatePipeline]', err);
+    logger.error('Failed in updatePipeline', { error: err instanceof Error ? err.message : 'Unknown error' });
     throw new Error(err instanceof Error ? err.message : 'Operation failed');
   }
 }
@@ -52,7 +53,7 @@ export async function deletePipeline(id: string) {
     await prisma.pipeline.delete({ where: { id } });
     revalidatePath('/');
   } catch (err) {
-    console.error('[deletePipeline]', err);
+    logger.error('Failed in deletePipeline', { error: err instanceof Error ? err.message : 'Unknown error' });
     throw new Error(err instanceof Error ? err.message : 'Operation failed');
   }
 }
@@ -67,7 +68,7 @@ export async function getPipeline(slug: string) {
       },
     });
   } catch (err) {
-    console.error('[getPipeline]', err);
+    logger.error('Failed in getPipeline', { error: err instanceof Error ? err.message : 'Unknown error' });
     throw new Error(err instanceof Error ? err.message : 'Operation failed');
   }
 }
@@ -83,7 +84,7 @@ export async function listPipelines() {
       },
     });
   } catch (err) {
-    console.error('[listPipelines]', err);
+    logger.error('Failed in listPipelines', { error: err instanceof Error ? err.message : 'Unknown error' });
     throw new Error(err instanceof Error ? err.message : 'Operation failed');
   }
 }
@@ -117,7 +118,7 @@ export async function addStep(data: {
     revalidatePath('/');
     return step;
   } catch (err) {
-    console.error('[addStep]', err);
+    logger.error('Failed in addStep', { error: err instanceof Error ? err.message : 'Unknown error' });
     throw new Error(err instanceof Error ? err.message : 'Operation failed');
   }
 }
@@ -127,7 +128,7 @@ export async function deleteStep(id: string) {
     await prisma.step.delete({ where: { id } });
     revalidatePath('/');
   } catch (err) {
-    console.error('[deleteStep]', err);
+    logger.error('Failed in deleteStep', { error: err instanceof Error ? err.message : 'Unknown error' });
     throw new Error(err instanceof Error ? err.message : 'Operation failed');
   }
 }
@@ -192,7 +193,7 @@ export async function triggerRun(pipelineId: string) {
     revalidatePath('/');
     return run;
   } catch (err) {
-    console.error('[triggerRun]', err);
+    logger.error('Failed in triggerRun', { error: err instanceof Error ? err.message : 'Unknown error' });
     throw new Error(err instanceof Error ? err.message : 'Operation failed');
   }
 }
@@ -205,7 +206,7 @@ export async function getRuns(pipelineId: string) {
       take: 50,
     });
   } catch (err) {
-    console.error('[getRuns]', err);
+    logger.error('Failed in getRuns', { error: err instanceof Error ? err.message : 'Unknown error' });
     throw new Error(err instanceof Error ? err.message : 'Operation failed');
   }
 }
@@ -220,7 +221,7 @@ export async function getRun(id: string) {
       },
     });
   } catch (err) {
-    console.error('[getRun]', err);
+    logger.error('Failed in getRun', { error: err instanceof Error ? err.message : 'Unknown error' });
     throw new Error(err instanceof Error ? err.message : 'Operation failed');
   }
 }
@@ -240,7 +241,7 @@ export async function getStats() {
 
     return { pipelineCount, runCount, successCount, failedCount };
   } catch (err) {
-    console.error('[getStats]', err);
+    logger.error('Failed in getStats', { error: err instanceof Error ? err.message : 'Unknown error' });
     throw new Error(err instanceof Error ? err.message : 'Operation failed');
   }
 }
